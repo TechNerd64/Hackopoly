@@ -1,11 +1,24 @@
 import pygame
+import cairosvg
 import sys
+import io
 
 pygame.init()
-screen = pygame.display.set_mode((640, 640))
-print("Window Loaded")
+screen = pygame.display.set_mode((800, 800))
+scale = 0.75
+
+## Convert SVG to PNG in memory
+svg_data = cairosvg.svg2png(
+    url="assets/scratch-tile.svg",
+    output_width = int(103 * scale),
+    output_height = int(150 * scale)
+)
+
+
+property_image = pygame.image.load(io.BytesIO(svg_data)).convert_alpha()
+property_image = pygame.transform.scale(property_image, (103 * scale, 150 * scale))
+
 pygame.display.set_caption("Hackopoly")
-print("Window Title Made")
 clock = pygame.time.Clock()
 
 running = True
@@ -15,12 +28,10 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    # Game Statements
-    # Player code and other loops
-
     # Change screen color
     screen.fill((30, 30, 30))
-
+    for x in range(0, 800, int(103 * scale)):
+        screen.blit(property_image, (x, 0))
 
     # Update screen and force 60 fps cap
     pygame.display.flip()
