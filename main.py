@@ -6,16 +6,23 @@ import io
 pygame.init()
 screen = pygame.display.set_mode((800, 800))
 scale = 0.75
+render_scale = 4
+tile_width = 103 * scale
+tile_height = 150 * scale
 
 ## Convert SVG to PNG in memory
 svg_data = cairosvg.svg2png(
     url="assets/scratch-tile.svg",
-    output_width = int(103 * scale),
-    output_height = int(150 * scale)
+    output_width = tile_width * render_scale,
+    output_height = tile_height * render_scale
 )
 
+high_res_tile = pygame.image.load(io.BytesIO(svg_data)).convert_alpha()
+property_image = pygame.transform.smoothscale(
+    high_res_tile,
+    (tile_width, tile_height)
+)
 
-property_image = pygame.image.load(io.BytesIO(svg_data)).convert_alpha()
 property_image = pygame.transform.scale(property_image, (103 * scale, 150 * scale))
 
 pygame.display.set_caption("Hackopoly")
