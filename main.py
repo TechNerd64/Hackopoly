@@ -10,30 +10,45 @@ render_scale = 3.5
 tile_width = int(103 * scale)
 tile_height = int(150 * scale)
 board_size = int(900 * scale)
+board_roation = 0
 
-## Convert SVG to PNG in memory
-svg_data = cairosvg.svg2png(
-    url="assets/scratch-tile.svg",
-    output_width = tile_width * render_scale,
-    output_height = tile_height * render_scale
-)
-
-high_res_tile = pygame.image.load(io.BytesIO(svg_data)).convert_alpha()
-property_image = pygame.transform.smoothscale(
-    high_res_tile,
-    (tile_width, tile_height)
-)
+def prepare_tile(tile_name):
+    ## Convert SVG to PNG in memory
+    svg_data = cairosvg.svg2png(
+        url= f"assets/{tile_name}.svg",
+        output_width = tile_width * render_scale,
+        output_height = tile_height * render_scale
+    )
+    high_res_tile = pygame.image.load(io.BytesIO(svg_data)).convert_alpha()
+    tile_image = pygame.transform.smoothscale(
+        high_res_tile,
+        (tile_width, tile_height)
+    )
+    return tile_image
 
 pygame.display.set_caption("Hackopoly")
 clock = pygame.time.Clock()
 
 
 def load_board():
-    rotation = 0
-    for i in range(4):
-        rotation += 1
-        for x in range(0, board_size, tile_width):
-            screen.blit(property_image, (x, 0))
+
+    property_image = prepare_tile("scratch-tile")
+    # Load Rotated Tiles
+    bottom_tile = property_image
+    top_tile = pygame.transform.rotate(property_image, 180)
+    left_tile = pygame.transform.rotate(property_image, -90)
+    right_tile = pygame.transform.rotate(property_image, 90)
+
+
+    # Top and Bottom
+    for x in range(0, board_size, tile_width):
+        screen.blit(top_tile, (x, 0))
+        screen.blit(bottom_tile, (x, (board_size - tile_height)+int(150 * scale)))
+
+    # Left and Right sides
+    for y in range(0, board_size, tile_width):
+        screen.blit(left_tile, (0,y))
+        screen.blit(right_tile, (board_size - tile_height, y))
         
 
 running = True
