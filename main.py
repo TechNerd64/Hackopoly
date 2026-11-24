@@ -1,105 +1,154 @@
-
 import pygame
 import cairosvg
-import sys
 import io
+import sys
 
 pygame.init()
-screen = pygame.display.set_mode((800, 800))
-scale = 0.5
-render_scale = 3.5
-corner_width = int(150 * scale)
-corner_height = corner_width
-board_size = int(900 * scale)
-tiles_per_side = 6
-tile_width = int((board_size - 2 * corner_width) / tiles_per_side)
-tile_height = int(150 * scale)
-board_roation = 0
 
-def prepare_corner(corner_name):
-    svg_data = cairosvg.svg2png(
-        url=f"assets/corners/{corner_name}.svg",
-        output_width=int(corner_width * render_scale),
-        output_height=int(corner_height * render_scale)
-    )
+screen_width = 1000
+screen_height = 1000
 
-    high_res_tile = pygame.image.load(
-        io.BytesIO(svg_data)
-    ).convert_alpha()
-
-    corner_image = pygame.transform.smoothscale(
-        high_res_tile,
-        (corner_width, corner_height)
-    )
-
-    return corner_image
-
-
-def prepare_tile(tile_name):
-    svg_data = cairosvg.svg2png(
-        url=f"assets/tiles/{tile_name}.svg",
-        output_width=int(tile_width * render_scale),
-        output_height=int(tile_height * render_scale)
-    )
-
-    high_res_tile = pygame.image.load(
-        io.BytesIO(svg_data)
-    ).convert_alpha()
-
-    tile_image = pygame.transform.smoothscale(
-        high_res_tile,
-        (tile_width, tile_height)
-    )
-
-    return tile_image
-
-
+screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Hackopoly")
 clock = pygame.time.Clock()
 
+scale = 0.5
+board_size = 1800
+corner_width = 300
+corner_height = 300
+tiles_per_side = 9
+tile_height = 200
+tile_width = int((board_size - 2 * corner_width) / tiles_per_side)
+render_scale = 3
+background_color = (30, 30, 30)
+
+
+def prepare_corner(corner_name):
+    svg_path = f"assets/corners/{corner_name}.svg"
+
+    png_data = cairosvg.svg2png(
+        url=svg_path,
+        output_width=corner_width * render_scale,
+        output_height=corner_height * render_scale
+    )
+
+    image = pygame.image.load(io.BytesIO(png_data)).convert_alpha()
+
+    image = pygame.transform.smoothscale(
+        image,
+        (corner_width, corner_height)
+    )
+
+    return image
+
+
+def prepare_tile(tile_name):
+    svg_path = f"assets/tiles/{tile_name}.svg"
+
+    png_data = cairosvg.svg2png(
+        url=svg_path,
+        output_width=int(tile_width * render_scale),
+        output_height=tile_height * render_scale
+    )
+
+    image = pygame.image.load(io.BytesIO(png_data)).convert_alpha()
+
+    image = pygame.transform.smoothscale(
+        image,
+        (round(tile_width), tile_height)
+    )
+
+    return image
+
 
 def load_board():
+    board_surface = pygame.Surface(
+        (board_size, board_size),
+        pygame.SRCALPHA
+    )
+
     corner_image = prepare_corner("GO")
-    property_image = prepare_tile("scratch-tile")
+    tile_image = prepare_tile("scratch-tile")
 
-    # Load rotated tiles
-    bottom_tile = property_image
-    top_tile = pygame.transform.rotate(property_image, 180)
-    left_tile = pygame.transform.rotate(property_image, -90)
-    right_tile = pygame.transform.rotate(property_image, 90)
+    tile_depth_offset = (corner_height - tile_height) // 2
 
-    # Top and Bottom
+    top_y = tile_depth_offset
+    bottom_y = board_size - corner_height + tile_depth_offset
+
+    left_x = tile_depth_offset
+    right_x = board_size - corner_width + tile_depth_offset
+
     for i in range(tiles_per_side):
-        x = corner_width + i * tile_width
+        x1 = corner_width + round(i * (board_size - 2 * corner_width) / tiles_per_side)
+        x2 = corner_width + round((i + 1) * (board_size - 2 * corner_width) / tiles_per_side)
 
-        screen.blit(top_tile, (x, 0))
-        screen.blit(bottom_tile, (x, board_size - corner_height))
+        current_width = x2 - x1
 
-    # Left and Right sides
+        tile = pygame.transform.smoothscale(
+            tile_image,
+            (current_width, tile_height)
+        )
+
+        board_surface.blit(tile, (x1, top_y))
+
+        bottom_tile = pygame.transform.rotate(tile, 180)
+
+        board_surface.blit(bottom_tile, (x1, bottom_y))
+
     for i in range(tiles_per_side):
-        y = corner_height + i * tile_width
+        y1 = corner_height + round(i * (board_size - 2 * corner_height) / tiles_per_side)
+        y2 = corner_height + round((i + 1) * (board_size - 2 * corner_height) / tiles_per_side)
 
-        screen.blit(left_tile, (0, y))
-        screen.blit(right_tile, (board_size - corner_width, y))
+        current_height = y2 - y1
 
-    # Corners
-    screen.blit(corner_image, (0, 0))
-    screen.blit(corner_image, (board_size - corner_width, 0))
-    screen.blit(corner_image, (0, board_size - corner_height))
-    screen.blit(corner_image, (board_size - corner_width, board_size - corner_height))
+        tile = pygame.transform.smoothscale(
+            tile_image,
+            (current_height, tile_height)
+        )
+
+        left_tile = pygame.transform.rotate(tile, 90)
+        right_tile = pygame.transform.rotate(tile, -90)
+
+        board_surface.blit(left_tile, (left_x, y1))
+        board_surface.blit(right_tile, (right_x, y1))
+
+    board_surface.blit(corner_image, (0, 0))
+    board_surface.blit(corner_image, (board_size - corner_width, 0))
+    board_surface.blit(corner_image, (0, board_size - corner_height))
+    board_surface.blit(
+        corner_image,
+        (board_size - corner_width, board_size - corner_height)
+    )
+
+    return board_surface
+
+
+board_surface = load_board()
+
+scaled_board_size = int(board_size * scale)
+
+scaled_board = pygame.transform.smoothscale(
+    board_surface,
+    (scaled_board_size, scaled_board_size)
+)
+
+board_x = (screen_width - scaled_board_size) // 2
+board_y = (screen_height - scaled_board_size) // 2
 
 
 running = True
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-    screen.fill((30, 30, 30))
+    screen.fill(background_color)
 
-    load_board()
+    screen.blit(scaled_board, (board_x, board_y))
 
     pygame.display.flip()
+
     clock.tick(60)
 
 pygame.quit()
