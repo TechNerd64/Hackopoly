@@ -43,6 +43,7 @@ def prepare_tile(tile_name):
     )
     return tile_image
 
+# Setup Window stuff right
 pygame.display.set_caption("Hackopoly")
 clock = pygame.time.Clock()
 
@@ -50,24 +51,34 @@ clock = pygame.time.Clock()
 def load_board():
     corner_image = prepare_corner("GO")
     property_image = prepare_tile("scratch-tile")
-    # Load Rotated Tiles
-    bottom_tile = property_image
+
+    # Regular tiles
     top_tile = pygame.transform.rotate(property_image, 180)
+    bottom_tile = property_image
     left_tile = pygame.transform.rotate(property_image, -90)
     right_tile = pygame.transform.rotate(property_image, 90)
 
+    # Corner tiles
+    top_left = corner_image
+    top_right = pygame.transform.rotate(corner_image, -90)
+    bottom_right = pygame.transform.rotate(corner_image, 180)
+    bottom_left = pygame.transform.rotate(corner_image, 90)
 
-    # Top and Bottom
-    for x in range(0, board_size, tile_width):
+    # Top and bottom sides
+    for x in range(corner_width, board_size - corner_width, tile_width):
         screen.blit(top_tile, (x, 0))
-        screen.blit(bottom_tile, (x, (board_size - tile_height)+int(150 * scale)))
+        screen.blit(bottom_tile, (x, board_size - tile_height))
 
-    # Left and Right sides
-    for y in range(0, board_size, tile_width):
-        screen.blit(left_tile, (0,y))
-        screen.blit(right_tile, (board_size - tile_height, y))
-        
+    # Left and right sides
+    for y in range(corner_height, board_size - corner_height, tile_width):
+        screen.blit(left_tile, (0, y))
+        screen.blit(right_tile, (board_size - corner_width, y))
 
+    # Draw corners
+    screen.blit(top_left, (0, 0))
+    screen.blit(top_right, (board_size - corner_width, 0))
+    screen.blit(bottom_right, (board_size - corner_width, board_size - corner_height))
+    screen.blit(bottom_left, (0, board_size - corner_height))
 running = True
 while running:
     # Event Inputs
