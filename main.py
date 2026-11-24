@@ -9,13 +9,30 @@ scale = 0.5
 render_scale = 3.5
 tile_width = int(103 * scale)
 tile_height = int(150 * scale)
+corner_width = int(150 * scale)
+corner_height = corner_width
 board_size = int(900 * scale)
 board_roation = 0
+
+def prepare_corner(corner_name):
+      ## Convert SVG to PNG in memory
+        svg_data = cairosvg.svg2png(
+            url= f"assets/corners/{corner_name}.svg",
+            output_width = corner_width * render_scale,
+            output_height = corner_height * render_scale
+        )
+        high_res_tile = pygame.image.load(io.BytesIO(svg_data)).convert_alpha()
+        corner_image = pygame.transform.smoothscale(
+            high_res_tile,
+            (corner_width, corner_height)
+        )
+        return corner_image
+    
 
 def prepare_tile(tile_name):
     ## Convert SVG to PNG in memory
     svg_data = cairosvg.svg2png(
-        url= f"assets/{tile_name}.svg",
+        url= f"assets/tiles/{tile_name}.svg",
         output_width = tile_width * render_scale,
         output_height = tile_height * render_scale
     )
@@ -31,7 +48,7 @@ clock = pygame.time.Clock()
 
 
 def load_board():
-
+    corner_image = prepare_corner("GO")
     property_image = prepare_tile("scratch-tile")
     # Load Rotated Tiles
     bottom_tile = property_image
