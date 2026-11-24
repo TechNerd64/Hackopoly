@@ -47,23 +47,15 @@ def prepare_tile(tile_name):
         output_height=tile_height * render_scale
     )
 
-    image = pygame.image.load(
-        io.BytesIO(png_data)
-    ).convert_alpha()
+    image = pygame.image.load(io.BytesIO(png_data)).convert_alpha()
 
-    image = pygame.transform.smoothscale(
-        image,
-        (tile_width, tile_height)
-    )
+    image = pygame.transform.smoothscale(image, (tile_width, tile_height))
 
     return image
 
 
 def load_board():
-    board_surface = pygame.Surface(
-        (board_size, board_size),
-        pygame.SRCALPHA
-    )
+    board_surface = pygame.Surface((board_size, board_size),pygame.SRCALPHA)
 
     corner_image = prepare_corner("GO")
     tile_image = prepare_tile("scratch-tile")
@@ -78,29 +70,14 @@ def load_board():
         x = corner_width + i * tile_width
         y = corner_height + i * tile_width
 
-        top_tile = tile_image
-
-        bottom_tile = pygame.transform.rotate(
-            tile_image,
-            180
-        )
-
-        left_tile = pygame.transform.rotate(
-            tile_image,
-            90
-        )
-
-        right_tile = pygame.transform.rotate(
-            tile_image,
-            -90
-        )
+        bottom_tile = tile_image
+        top_tile = pygame.transform.rotate(tile_image, 180)
+        right_tile = pygame.transform.rotate(tile_image, 90)
+        left_tile = pygame.transform.rotate(tile_image, -90)
 
         board_surface.blit(top_tile, (x, top_y))
-
         board_surface.blit(bottom_tile, (x, bottom_y))
-
         board_surface.blit(left_tile, (left_x, y))
-
         board_surface.blit(right_tile, (right_x, y))
 
     board_surface.blit(corner_image,(0, 0))
@@ -114,10 +91,7 @@ board_surface = load_board()
 
 scaled_board_size = round(board_size * scale)
 
-scaled_board = pygame.transform.smoothscale(
-    board_surface,
-    (scaled_board_size, scaled_board_size)
-)
+scaled_board = pygame.transform.smoothscale(board_surface, (scaled_board_size, scaled_board_size))
 
 board_x = (screen_width - scaled_board_size) // 2
 board_y = (screen_height - scaled_board_size) // 2
