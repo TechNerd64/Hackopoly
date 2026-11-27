@@ -1,4 +1,3 @@
-
 import pygame
 import cairosvg
 import io
@@ -6,8 +5,8 @@ import sys
 
 pygame.init()
 
-screen_width = 1000
-screen_height = 1000
+screen_width = 1200
+screen_height = 675
 
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Hackopoly")
@@ -20,8 +19,9 @@ tile_height = 150
 tiles_per_side = 9
 board_size = (2 * corner_width+ tiles_per_side * tile_width)
 render_scale = 3
-scale = 0.75
+scale = 0.5
 background_color = (30, 30, 30)
+rotation_angle = 45
 
 
 def prepare_corner(corner_name):
@@ -104,7 +104,9 @@ while running:
 
     screen.fill(background_color)
 
-    screen.blit(scaled_board,(board_x, board_y))
+    rotated_surface = pygame.transform.rotate(scaled_board, rotation_angle)
+    rotated_rect = rotated_surface.get_rect(center=(board_x // 2, board_y // 2))
+    screen.blit(rotated_surface, rotated_rect)
 
     pygame.display.flip()
 
