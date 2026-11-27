@@ -21,7 +21,7 @@ board_size = (2 * corner_width+ tiles_per_side * tile_width)
 render_scale = 3
 scale = 0.5
 background_color = (30, 30, 30)
-rotation_angle = 45
+rotation_angle = 0
 
 
 def prepare_corner(corner_name):
@@ -105,7 +105,7 @@ while running:
     screen.fill(background_color)
 
     rotated_surface = pygame.transform.rotate(scaled_board, rotation_angle)
-    rotated_rect = rotated_surface.get_rect(center=(board_x // 2, board_y // 2))
+    rotated_rect = rotated_surface.get_rect(center=(screen_width // 2, screen_height // 2))
     screen.blit(rotated_surface, rotated_rect)
 
     pygame.display.flip()
